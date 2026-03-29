@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Táxi JF — Quanto vai custar?</title>
+<meta name="theme-color" content="#0f0f0f">
+<link href="T%C3%A1xi%20JF%20%E2%80%94%20Quanto%20vai%20custar__files/css2.css" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1e1e1e;
+    --border: #2a2a2a;
+    --yellow: #FFE600;
+    --yellow-dim: rgba(255,230,0,0.12);
+    --yellow-mid: rgba(255,230,0,0.35);
+    --green: #00e676;
+    --red: #ff3d3d;
+    --white: #f5f5f5;
+    --muted: #666;
+    --text: #e8e8e8;
+    --radius: 16px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── NOISE TEXTURE ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.5;
+  }
+
+  /* ── YELLOW GLOW BG ── */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(255,230,0,0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 16px 40px;
+  }
+
+  /* ── HEADER ── */
+  header {
+    padding: 28px 0 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .logo-block {}
+
+  .logo-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--yellow);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+    display: block;
+  }
+
+  .logo-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--white);
+    line-height: 1;
+    letter-spacing: -1px;
+  }
+
+  .logo-title span {
+    color: var(--yellow);
+  }
+
+  .live-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,230,118,0.1);
+    border: 1px solid rgba(0,230,118,0.3);
+    border-radius: 40px;
+    padding: 6px 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--green);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    white-space: nowrap;
+    margin-top: 6px;
+  }
+
+  .live-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  /* ── HEADLINE ── */
+  .headline {
+    margin-bottom: 24px;
+  }
+
+  .headline h1 {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(1.6rem, 6vw, 2.2rem);
+    font-weight: 800;
+    line-height: 1.1;
+    color: var(--white);
+    margin-bottom: 8px;
+  }
+
+  .headline h1 em {
+    font-style: normal;
+    color: var(--yellow);
+    position: relative;
+  }
+
+  .headline p {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-weight: 300;
+    line-height: 1.5;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  .card-header {
+    padding: 16px 20px 12px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .step-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    background: var(--yellow);
+    color: #000;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .card-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .card-body {
+    padding: 16px 20px 20px;
+  }
+
+  /* ── GPS BUTTON ── */
+  .gps-btn {
+    width: 100%;
+    background: var(--yellow-dim);
+    border: 1px dashed var(--yellow-mid);
+    border-radius: 12px;
+    padding: 18px 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+
+  .gps-btn:hover {
+    background: rgba(255,230,0,0.18);
+    border-color: rgba(255,230,0,0.6);
+  }
+
+  .gps-btn.success {
+    background: rgba(0,230,118,0.08);
+    border-color: rgba(0,230,118,0.4);
+    border-style: solid;
+    cursor: default;
+  }
+
+  .gps-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--yellow);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+
+  .gps-btn.success .gps-icon {
+    background: var(--green);
+  }
+
+  .gps-texts {}
+  .gps-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 2px;
+  }
+  .gps-subtitle {
+    font-size: 0.75rem;
+    color: var(--muted);
+    line-height: 1.4;
+  }
+
+  /* ── ORIGIN DISPLAY ── */
+  .origin-info {
+    display: none;
+    margin-top: 12px;
+    padding: 12px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .origin-info.visible {
+    display: flex;
+    animation: slideIn 0.3s ease;
+  }
+
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(-6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .origin-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--yellow);
+    margin-top: 4px;
+    flex-shrink: 0;
+  }
+
+  .origin-addr {
+    font-size: 0.8rem;
+    color: var(--text);
+    line-height: 1.5;
+    flex: 1;
+  }
+
+  .origin-coords {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* ── DESTINATION INPUT ── */
+  .dest-input-wrap {
+    position: relative;
+  }
+
+  .dest-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  .dest-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--green);
+  }
+
+  .dest-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .dest-input::placeholder {
+    color: #3a3a3a;
+  }
+
+  .dest-input:focus {
+    border-color: rgba(255,230,0,0.5);
+    background: #1a1a1a;
+    box-shadow: 0 0 0 3px rgba(255,230,0,0.08);
+  }
+
+  /* ── AUTOCOMPLETE ── */
+  .autocomplete-list {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    right: 0;
+    background: #1c1c1c;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    z-index: 200;
+    max-height: 220px;
+    overflow-y: auto;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+  }
+
+  .autocomplete-item {
+    padding: 12px 16px;
+    font-size: 0.85rem;
+    color: var(--text);
+    cursor: pointer;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.15s;
+  }
+
+  .autocomplete-item:last-child { border-bottom: none; border-radius: 0 0 12px 12px; }
+  .autocomplete-item:first-child { border-radius: 12px 12px 0 0; }
+  .autocomplete-item:hover { background: #222; }
+
+  .autocomplete-icon {
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  /* ── CALC BUTTON ── */
+  .calc-btn {
+    width: 100%;
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 14px;
+    padding: 16px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 1rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .calc-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(255,255,255,0.15);
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .calc-btn:hover::before { transform: translateX(0); }
+  .calc-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(255,230,0,0.25); }
+  .calc-btn:active { transform: translateY(0); }
+
+  .calc-btn:disabled {
+    background: #2a2a2a;
+    color: var(--muted);
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .calc-btn:disabled::before { display: none; }
+
+  .spinner {
+    display: none;
+    width: 18px;
+    height: 18px;
+    border: 2px solid rgba(0,0,0,0.3);
+    border-top-color: #000;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+
+  .calc-btn.loading .btn-text { display: none; }
+  .calc-btn.loading .spinner { display: block; }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── RESULT ── */
+  .result-card {
+    display: none;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    animation: slideIn 0.4s ease;
+  }
+
+  .result-card.visible { display: block; }
+
+  .result-top {
+    padding: 28px 24px 20px;
+    background: linear-gradient(135deg, #1a1a00 0%, #161600 100%);
+    border-bottom: 1px solid var(--border);
+    text-align: center;
+    position: relative;
+  }
+
+  .result-top::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(255,230,0,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .result-label-top {
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: rgba(255,230,0,0.5);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .result-value {
+    font-family: 'Syne', sans-serif;
+    font-size: clamp(2.2rem, 8vw, 3.2rem);
+    font-weight: 900;
+    color: var(--yellow);
+    line-height: 1;
+    margin-bottom: 4px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .result-sub {
+    font-size: 0.75rem;
+    color: rgba(255,230,0,0.4);
+    font-family: 'Space Mono', monospace;
+  }
+
+  .result-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 12px;
+    background: rgba(255,230,0,0.1);
+    border: 1px solid rgba(255,230,0,0.2);
+    border-radius: 40px;
+    padding: 5px 12px;
+    font-family: 'Space Mono', monospace;
+    font-size: 0.6rem;
+    color: rgba(255,230,0,0.7);
+    letter-spacing: 1px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .result-badge.bandeira2 {
+    background: rgba(255,61,61,0.1);
+    border-color: rgba(255,61,61,0.3);
+    color: var(--red);
+  }
+
+  .result-body {
+    padding: 16px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .result-msg-box {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.5;
+    display: flex;
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .result-msg-icon {
+    flex-shrink: 0;
+    font-size: 0.9rem;
+  }
+
+  /* ── WHATSAPP BUTTON ── */
+  .whatsapp-btn {
+    width: 100%;
+    background: #25D366;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 15px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .whatsapp-btn:hover {
+    background: #1ebe5a;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(37,211,102,0.3);
+  }
+
+  .novo-btn {
+    width: 100%;
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .novo-btn:hover {
+    border-color: rgba(255,230,0,0.3);
+    color: var(--yellow);
+  }
+
+  /* ── AVALIAÇÃO ── */
+  .avaliacao-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .avaliacao-label {
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .btn-av {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-av:hover { background: #252525; transform: scale(1.1); }
+  .btn-av.ativo { background: rgba(255,230,0,0.15); border-color: rgba(255,230,0,0.4); }
+
+  /* ── OVERLAYS ── */
+  .confirm-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 9999; padding: 20px;
+  }
+
+  .confirm-box {
+    background: #1a1a1a;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 28px 24px;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.6);
+    animation: slideIn 0.3s ease;
+  }
+
+  .confirm-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1rem;
+    font-weight: 800;
+    color: var(--yellow);
+    line-height: 1.4;
+    margin-bottom: 16px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .confirm-body {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .confirm-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .btn-ok {
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 10px;
+    padding: 13px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 0.9rem;
+    cursor: pointer;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    transition: all 0.2s;
+  }
+  .btn-ok:hover { opacity: 0.9; }
+
+  .btn-cancel {
+    background: transparent;
+    color: var(--muted);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 11px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-cancel:hover { border-color: rgba(255,230,0,0.3); color: var(--yellow); }
+
+  /* ── MODAL TERMOS ── */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: var(--bg);
+    z-index: 2000;
+    display: flex; align-items: center; justify-content: center;
+    padding: 20px;
+  }
+
+  .modal-box {
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+  }
+
+  .modal-emoji {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    display: block;
+  }
+
+  .modal-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: var(--yellow);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: -0.5px;
+  }
+
+  .modal-sub {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  .modal-text-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    text-align: left;
+    margin-bottom: 16px;
+  }
+
+  .modal-text-box p {
+    font-size: 0.875rem;
+    color: rgba(232,232,232,0.7);
+    line-height: 1.7;
+  }
+
+  .modal-text-box p strong {
+    color: var(--yellow);
+    font-weight: 700;
+  }
+
+  .modal-check-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+  }
+
+  .modal-check-row:hover { border-color: rgba(255,230,0,0.3); }
+  .modal-check-row.checked { border-color: var(--green); background: rgba(0,230,118,0.06); }
+
+  .modal-checkbox {
+    width: 22px;
+    height: 22px;
+    border: 2px solid var(--border);
+    border-radius: 6px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: var(--green);
+    transition: all 0.2s;
+  }
+
+  .modal-check-row.checked .modal-checkbox {
+    background: var(--green);
+    border-color: var(--green);
+    color: #000;
+  }
+
+  .modal-check-label {
+    font-size: 0.85rem;
+    color: var(--text);
+    line-height: 1.4;
+  }
+
+  .modal-btn {
+    width: 100%;
+    background: var(--yellow);
+    color: #000;
+    border: none;
+    border-radius: 12px;
+    padding: 15px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 900;
+    font-size: 1rem;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    opacity: 0.35;
+    pointer-events: none;
+  }
+
+  .modal-btn.enabled {
+    opacity: 1;
+    pointer-events: all;
+  }
+
+  .modal-btn.enabled:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(255,230,0,0.3);
+  }
+
+  /* ── NOTIF ── */
+  .notif {
+    position: fixed;
+    bottom: 24px; left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: #1e1e1e;
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 12px 24px;
+    border-radius: 40px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    opacity: 0;
+    transition: all 0.3s;
+    z-index: 999;
+    white-space: nowrap;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+
+  .notif.show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    padding: 20px 0 8px;
+    font-size: 0.72rem;
+    color: #333;
+    font-family: 'Space Mono', monospace;
+  }
+
+  /* ── NÚMERO POPUP ── */
+  .num-input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid rgba(255,230,0,0.4);
+    border-radius: 10px;
+    padding: 14px;
+    font-family: 'Syne', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--yellow);
+    text-align: center;
+    outline: none;
+    margin: 16px 0;
+  }
+
+  .num-input:focus {
+    box-shadow: 0 0 0 3px rgba(255,230,0,0.15);
+  }
+
+  @media (max-width: 420px) {
+    .logo-title { font-size: 1.6rem; }
+    .result-value { font-size: 2rem; }
+    .headline h1 { font-size: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<!-- MODAL TERMOS -->
+<div class="modal-overlay" id="modal-termos">
+  <div class="modal-box">
+    <span class="modal-emoji">🚕</span>
+    <div class="modal-title">Táxi JF</div>
+    <div class="modal-sub">Estimativa de valor para corridas em Juiz de Fora</div>
+
+    <div class="modal-text-box">
+      <p>
+        Os valores exibidos são <strong>estimativas</strong> com base na tabela oficial do taxímetro.<br><br>
+        O valor final da corrida é definido pelo taxímetro ao término do
+ trajeto, podendo variar conforme trânsito e condições da via.
+      </p>
+    </div>
+
+    <div class="modal-check-row" id="check-row" onclick="toggleCheck()">
+      <div class="modal-checkbox" id="modal-checkbox"></div>
+      <span class="modal-check-label">Entendi. Os valores são estimativas e o taxímetro é quem define o valor final.</span>
+    </div>
+
+    <button class="modal-btn" id="modal-btn" onclick="entrarNoApp()">
+      Calcular minha corrida
+    </button>
+  </div>
+</div>
+
+<div class="wrapper">
+  <header>
+    <div class="logo-block">
+      <span class="logo-tag">★ Juiz de Fora · MG</span>
+      <div class="logo-title">Táxi<span>JF</span></div>
+    </div>
+    <div class="live-badge">
+      <div class="live-dot"></div>
+      Ao vivo
+    </div>
+  </header>
+
+  <div class="headline">
+    <h1>Quanto vai custar<br>sua <em>corrida?</em></h1>
+    <p>Compartilhe sua localização e informe o destino para calcular a estimativa.</p>
+  </div>
+
+  <!-- STEP 1: ORIGEM GPS -->
+  <div class="card" id="card-origem">
+    <div class="card-header">
+      <div class="step-num">01</div>
+      <span class="card-label">Sua localização atual</span>
+    </div>
+    <div class="card-body">
+      <button class="gps-btn" id="gps-btn" onclick="obterLocalizacao()">
+        <div class="gps-icon" id="gps-icon">📍</div>
+        <div class="gps-texts">
+          <div class="gps-title" id="gps-title">Permitir minha localização</div>
+          <div class="gps-subtitle" id="gps-subtitle">Toque para compartilhar onde você está agora</div>
+        </div>
+      </button>
+      <div class="origin-info" id="origin-info">
+        <div class="origin-dot"></div>
+        <div>
+          <div class="origin-addr" id="origin-addr">—</div>
+          <div class="origin-coords" id="origin-coords"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2: DESTINO -->
+  <div class="card">
+    <div class="card-header">
+      <div class="step-num">02</div>
+      <span class="card-label">Para onde vamos?</span>
+    </div>
+    <div class="card-body">
+      <div class="dest-label">
+        <div class="dest-dot"></div>
+        Destino
+      </div>
+      <div class="dest-input-wrap" id="dest-wrap">
+        <input class="dest-input" id="dest-input" type="text" placeholder="Rua, número, bairro ou local..." autocomplete="off">
+      </div>
+      <input type="hidden" id="origin-lat">
+      <input type="hidden" id="origin-lon">
+    </div>
+  </div>
+
+  <!-- BOTÃO CALCULAR -->
+  <button class="calc-btn" id="calc-btn" onclick="calcular()" disabled="disabled">
+    <span class="btn-text">Calcular estimativa</span>
+    <div class="spinner"></div>
+  </button>
+
+  <!-- RESULTADO -->
+  <div class="result-card" id="result-card">
+    <div class="result-top">
+      <div class="result-label-top">Estimativa de valor</div>
+      <div class="result-value" id="result-value">R$ —</div>
+      <div class="result-sub">valor aproximado da corrida</div>
+      <div class="result-badge" id="bandeira-badge">⚑ Bandeira 1</div>
+    </div>
+    <div class="result-body">
+      <div class="result-msg-box" id="result-msg-box">
+        <span class="result-msg-icon">ℹ️</span>
+        <span id="result-msg-text"></span>
+      </div>
+      <a class="whatsapp-btn" id="whatsapp-btn" href="#" target="_blank">
+        <span>📲</span>
+        <span>Chamar táxi pelo WhatsApp</span>
+      </a>
+      <div class="avaliacao-row" id="avaliacao-row">
+        <span class="avaliacao-label">Essa estimativa foi útil?</span>
+        <button class="btn-av" onclick="avaliar(1)" id="btn-like">👍</button>
+        <button class="btn-av" onclick="avaliar(0)" id="btn-dislike">👎</button>
+      </div>
+      <button class="novo-btn" onclick="novoCalculo()">← Calcular outra corrida</button>
+    </div>
+  </div>
+
+  <footer>taxijf · baseado na tabela oficial do taxímetro de JF</footer>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+  // ─────────────────────────────────────────────────────────────
+  // CONFIGURAÇÕES
+  // ─────────────────────────────────────────────────────────────
+  const GOOGLE_API_KEY = 'AIzaSyC6M_XhgT-xqltyObVbmanmzSiqCH_AlD0';
+  const WHATSAPP_NUM   = '5532999999999'; // ← SUBSTITUA pelo seu número
+  const TARIFAS        = { bandeirada: 6.83, kmB1: 3.83, kmB2: 4.10, horaParada: 30.72 };
+  const JF_CENTRO      = { lat: -21.7642, lon: -43.3503 };
+
+  let bandeira = 1;
+  let origemCoord = null; // { lat, lon, endFormatado }
+  let destCoord   = null; // { lat, lon, formatted, ehLocal, ehBairro, raioBairro }
+
+  // ─────────────────────────────────────────────────────────────
+  // BANDEIRA
+  // ─────────────────────────────────────────────────────────────
+  function detectarBandeira() {
+    const now  = new Date();
+    const hora = now.getHours();
+    const dia  = now.getDay();
+    const FERIADOS = ['01-01','21-04','01-05','07-09','12-10','02-11','15-11','25-12','08-12','20-11'];
+    const mmdd = String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0');
+    const domingoOuFeriado  = dia === 0 || FERIADOS.includes(mmdd);
+    const noturnoSegSab     = (dia >= 1 && dia <= 6) && (hora >= 22 || hora < 6);
+    bandeira = (domingoOuFeriado || noturnoSegSab) ? 2 : 1;
+  }
+  detectarBandeira();
+
+  // ─────────────────────────────────────────────────────────────
+  // HELPERS
+  // ─────────────────────────────────────────────────────────────
+  function norm(t) {
+    return t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  }
+
+  function distanciaKm(lat1, lon1, lat2, lon2) {
+    const R = 6371;
+    const dLat = (lat2-lat1)*Math.PI/180, dLon = (lon2-lon1)*Math.PI/180;
+    const a = Math.sin(dLat/2)**2 + Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)**2;
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+
+  function showNotif(msg) {
+    const n = document.getElementById('notif');
+    n.textContent = msg; n.classList.add('show');
+    setTimeout(() => n.classList.remove('show'), 3200);
+  }
+
+  function atualizarBotaoCalc() {
+    const btn = document.getElementById('calc-btn');
+    const destOk = !!destCoord || (document.getElementById('dest-input').value.trim().length >= 3);
+    btn.disabled = !(origemCoord && destOk);
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // CIDADES BLOQUEADAS
+  // ─────────────────────────────────────────────────────────────
+  const CIDADES_BLOQUEADAS = [
+    'bicas','barbacena','lima duarte','santos dumont','matias barbosa',
+    'ewbank da camara','ewbank','mar de espanha','leopoldina','cataguases',
+    'muriae','muriaé','uba','ubá','visconde do rio branco','tabuleiro',
+    'rio novo','santa rita de jacutinga','pedro teixeira','bias forges',
+    'bias fortes','olaria','rio preto','descoberto','chacara','chácara',
+    'piau','simao pereira','simão pereira','coronel pacheco','guarara',
+    'guarará','rochedo de minas','senador cortes','santana do deserto','pequeri'
+  ];
+
+  function destinoBloqueado(texto) {
+    const n = norm(texto.trim());
+    return CIDADES_BLOQUEADAS.some(c => {
+      const cn = norm(c);
+      return n === cn || n.startsWith(cn+' ') || n.startsWith(cn+',');
+    });
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // BAIRROS
+  // ─────────────────────────────────────────────────────────────
+  const BAIRROS_P = new Set([
+    'centro','cascatinha','jardim norte','bandeirantes','alto dos passos',
+    'santa terezinha','granbery','bom pastor','poco rico','dom bosco',
+    'santa catarina','santos anjos','morro da gloria','paineiras',
+    'jardim gloria','jardim laranjeiras','vale do ipe','costa carvalho',
+    'lourdes','sao bernardo','sao benedito','grajau','eldorado',
+    'vivendas da serra','progresso','santa paula','manoel honorio',
+    'nossa senhora aparecida','centenario','guarua','previdenciarios',
+    'sao geraldo','jardim de ala','jardim america','parque burnier','jardim esperanca',
+  ]);
+  const BAIRROS_G = new Set([
+    'benfica','nova benfica','grama','borboleta','barreira do triunfo',
+    'sao pedro','aeroporto','salvaterra','distrito industrial',
+    'monte castelo','recanto dos lagos','filgueiras','igrejinha',
+    'valadares','toledos','humaita','vila esperanca','linhares',
+    'caete','santo antonio','retiro','santa cruz','nova era','graminha',
+  ]);
+
+  function classificarBairro(n) {
+    if (BAIRROS_P.has(n)) return 'P';
+    if (BAIRROS_G.has(n)) return 'G';
+    return 'M';
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // BASE LOCAL
+  // ─────────────────────────────────────────────────────────────
+  const BASE_LOCAL = [{"n": "Pátio Suprema", "r": "Rua das Flores", "num": "", "b": "Grama", "lat": -21.8055, "lon": -43.3953}, {"n": "Pátio de Veículos Suprema", "r": "Rua das Flores", "num": "", "b": "Grama", "lat": -21.8055, "lon": -43.3953}, {"n": "Cemitério Parque da Saudade", "r": "Rua Alencar Tristão", "num": "", "b": "Santa Terezinha", "lat": -21.7372, "lon": -43.3589}, {"n": "Cemitério Municipal", "r": "Rua Viscondessa di Cavalcante", "num": "36", "b": "Poço Rico", "lat": -21.7601, "lon": -43.337}, {"n": "Cartório Viana Júnior", "r": "Av. Barão do Rio Branco", "num": "2050", "b": "Centro", "lat": -21.7558, "lon": -43.351}, {"n": "Delegacia de Polícia Civil Centro", "r": "Rua Batista de Oliveira", "num": "820", "b": "Centro", "lat": -21.7624, "lon": -43.3462}, {"n": "Fórum Benjamin Colucci", "r": "Rua Santo Antônio", "num": "1260", "b": "Centro", "lat": -21.76, "lon": -43.346}, {"n": "Estádio Radialista Mário Helênio", "r": "Rua Filgueiras", "num": "", "b": "Graminha", "lat": -21.732, "lon": -43.4003}, {"n": "Hospital Monte Sinai", "r": "Av. Presidente Itamar Franco", "num": "4001", "b": "Cascatinha", "lat": -21.7814899, "lon": -43.3649857}, {"n": "Santa Casa de Misericórdia", "r": "Av. Barão do Rio Branco", "num": "3353", "b": "Morro da Glória", "lat": -21.7643, "lon": -43.3497}, {"n": "Hospital Unimed", "r": "Av. Deusdedith Salgado", "num": "3930", "b": "Teixeiras", "lat": -21.8052707, "lon": -43.3718785}, {"n": "Hospital João Penido", "r": "Av. Barão do Rio Branco", "num": "3408", "b": "Morro da Glória", "lat": -21.7648, "lon": -43.3501}, {"n": "Hospital 9 de Julho", "r": "Av. Itamar Franco", "num": "", "b": "", "lat": -21.7636259, "lon": -43.3442313}, {"n": "UPA Norte", "r": "Av. Barão do Rio Branco", "num": "2288", "b": "Morro da Glória", "lat": -21.753, "lon": -43.3545}, {"n": "UPA Sul", "r": "R. Pe. Café", "num": "839", "b": "São Mateus", "lat": -21.782, "lon": -43.358}, {"n": "HU UFJF Hospital Universitário", "r": "Av. Eugênio do Nascimento", "num": "", "b": "Dom Bosco", "lat": -21.78, "lon": -43.37}, {"n": "Shopping Independência", "r": "Av. Presidente Itamar Franco", "num": "3600", "b": "Cascatinha", "lat": -21.7808473, "lon": -43.3602956}, {"n": "Shopping Jardim Norte", "r": "Av. Barão do Rio Branco", "num": "2900", "b": "Jardim Norte", "lat": -21.74083898, "lon": -43.37134838}, {"n": "Santa Cruz Shopping", "r": "R. Jarbas de Lery Santos", "num": "166", "b": "Centro", "lat": -21.7639, "lon": -43.3504}, {"n": "Alameda Shopping", "r": "Av. Presidente Itamar Franco", "num": "1500", "b": "São Mateus", "lat": -21.7703, "lon": -43.348}, {"n": "Bahamas São Vicente", "r": "Av. Presidente Itamar Franco", "num": "1350", "b": "São Mateus", "lat": -21.7695, "lon": -43.3493}, {"n": "Bahamas São Pedro", "r": "Av. Presidente Costa e Silva", "num": "2100", "b": "São Pedro", "lat": -21.7724, "lon": -43.3779}, {"n": "Bahamas Cascatinha", "r": "Av. Presidente Itamar Franco", "num": "3760", "b": "Cascatinha", "lat": -21.7750989, "lon": -43.3469038}, {"n": "Carrefour Juiz de Fora", "r": "Av. Presidente Itamar Franco", "num": "4000", "b": "Cascatinha", "lat": -21.782, "lon": -43.365}, {"n": "UFJF", "r": "Rua José Lourenço Kelmer", "num": "", "b": "São Pedro", "lat": -21.7766, "lon": -43.3694}, {"n": "Rodoviária de Juiz de Fora", "r": "Av. Brasil", "num": "9501", "b": "São Dimas", "lat": -21.7365, "lon": -43.3388}, {"n": "Aeroporto Serrinha", "r": "Av. Deusdedith Salgado", "num": "", "b": "Serrinha", "lat": -21.7925, "lon": -43.387}, {"n": "Prefeitura de Juiz de Fora", "r": "Av. Brasil", "num": "2001", "b": "Centro", "lat": -21.7576402, "lon": -43.3440424}, {"n": "Polícia Federal", "r": "Av. Brasil", "num": "4150", "b": "Manoel Honório", "lat": -21.7454437, "lon": -43.3523746}, {"n": "Parque Halfeld", "r": "R. Halfeld", "num": "", "b": "Centro", "lat": -21.762, "lon": -43.3498}, {"n": "Parque da Lajinha", "r": "Av. Eugênio do Nascimento", "num": "", "b": "Dom Bosco", "lat": -21.7926809, "lon": -43.3663968}, {"n": "Parque Mariano Procópio", "r": "R. Mariano Procópio", "num": "", "b": "Mariano Procópio", "lat": -21.7475157, "lon": -43.3597554}, {"n": "César Park Hotel", "r": "R. Santa Rita", "num": "181", "b": "Centro", "lat": -21.7618789, "lon": -43.3445287}, {"n": "BHR Juiz de Fora", "r": "Av. Deusdedith Salgado", "num": "5050", "b": "Salvaterra", "lat": -21.8126605, "lon": -43.3757283}, {"n": "Suprema Faculdade", "r": "Alameda Salvaterra", "num": "200", "b": "Salvaterra", "lat": -21.8167449, "lon": -43.3797044}, {"n": "DETRAN Juiz de Fora", "r": "Av. Brasil", "num": "3500", "b": "Centro", "lat": -21.749, "lon": -43.349}, {"n": "Mirante do Cristo", "r": "", "num": "", "b": "", "lat": -21.7637171, "lon": -43.3572999}, {"n": "Granbery", "r": "Av. Barão do Rio Branco", "num": "2850", "b": "", "lat": -21.756, "lon": -43.353}, {"n": "Faculdade Estácio", "r": "R. Sampaio", "num": "", "b": "", "lat": -21.783444, "lon": -43.3357114}, {"n": "Premier Parc Hotel", "r": "", "num": "", "b": "", "lat": -21.7925518, "lon": -43.3656576}, {"n": "Trade Hotel", "r": "Av. Presidente Itamar Franco", "num": "", "b": "", "lat": -21.7811877, "lon": -43.3614894}];
+
+  function buscarBaseLocal(query) {
+    const q = norm(query.trim());
+    return BASE_LOCAL.filter(l => {
+      if (!norm(l.n).includes(q)) return false;
+      return distanciaKm(l.lat, l.lon, JF_CENTRO.lat, JF_CENTRO.lon) <= 25;
+    }).sort((a,b) => {
+      const aStart = norm(a.n).startsWith(q) ? 0 : 1;
+      const bStart = norm(b.n).startsWith(q) ? 0 : 1;
+      return aStart - bStart;
+    }).slice(0,4).map(l => ({
+      geometry: { location: { lat: l.lat, lng: l.lon } },
+      formatted_address: [l.n, l.r && l.num ? l.r+', '+l.num : l.r, l.b, 'Juiz de Fora, MG'].filter(Boolean).join(', '),
+      types: ['establishment'],
+      _local: true,
+      _ehBairro: l.r === '' && l.num === '' && l.n === l.b,
+      _raioBairro: (l.r===''&&l.num===''&&l.n===l.b) ? (l.raio||'M') : null
+    }));
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // GEOLOCALIZAÇÃO DO CLIENTE
+  // ─────────────────────────────────────────────────────────────
+  function obterLocalizacao() {
+    const btn       = document.getElementById('gps-btn');
+    const icon      = document.getElementById('gps-icon');
+    const title     = document.getElementById('gps-title');
+    const subtitle  = document.getElementById('gps-subtitle');
+
+    if (btn.classList.contains('success')) return;
+
+    title.textContent    = 'Obtendo localização...';
+    subtitle.textContent = 'Aguarde um momento';
+    icon.textContent     = '⌛';
+
+    if (!navigator.geolocation) {
+      showNotif('❌ Geolocalização não suportada neste dispositivo.');
+      title.textContent = 'Não suportado';
+      return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+      async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+
+        // Verifica se está razoavelmente perto de JF (raio de 60km)
+        const distJF = distanciaKm(lat, lon, JF_CENTRO.lat, JF_CENTRO.lon);
+        if (distJF > 60) {
+          icon.textContent     = '⚠️';
+          title.textContent    = 'Localização fora de JF';
+          subtitle.textContent = 'Parece que você está longe de Juiz de Fora';
+          showNotif('⚠️ Localização fora do perímetro de JF');
+          return;
+        }
+
+        // Reverse geocoding
+        let endFormatado = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+        try {
+          const url = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&language=pt-BR&key=${GOOGLE_API_KEY}`;
+          const r   = await fetch(url);
+          const d   = await r.json();
+          if (d.status === 'OK' && d.results.length) {
+            const res  = d.results[0];
+            const comps = res.address_components || [];
+            const rua    = comps.find(c => c.types.includes('route'));
+            const numero = comps.find(c => c.types.includes('street_number'));
+            const bairro = comps.find(c => c.types.includes('sublocality_level_1') || c.types.includes('neighborhood'));
+            const partes = [];
+            if (rua)    partes.push(rua.long_name);
+            if (numero) partes.push(numero.long_name);
+            if (bairro) partes.push(bairro.long_name);
+            endFormatado = partes.length ? partes.join(', ') : res.formatted_address.split(',').slice(0,2).join(',');
+          }
+        } catch(e) {}
+
+        origemCoord = { lat, lon, endFormatado };
+        document.getElementById('origin-lat').value = lat;
+        document.getElementById('origin-lon').value = lon;
+
+        // UI feedback
+        btn.classList.add('success');
+        icon.textContent     = '✅';
+        title.textContent    = 'Localização obtida!';
+        subtitle.textContent = endFormatado;
+
+        document.getElementById('origin-addr').textContent  = endFormatado;
+        document.getElementById('origin-coords').textContent = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+        document.getElementById('origin-info').classList.add('visible');
+
+        atualizarBotaoCalc();
+        showNotif('📍 Localização capturada!');
+      },
+      (err) => {
+        icon.textContent = '❌';
+        title.textContent = 'Permissão negada';
+        subtitle.textContent = 'Ative a localização nas configurações do seu celular';
+        showNotif('❌ Permissão de localização negada.');
+      },
+      { enableHighAccuracy: true, timeout: 12000 }
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // AUTOCOMPLETE DESTINO
+  // ─────────────────────────────────────────────────────────────
+  const _cache = {};
+  let _acTimer = null;
+  const destInput = document.getElementById('dest-input');
+  const destWrap  = document.getElementById('dest-wrap');
+
+  destInput.addEventListener('input', () => {
+    clearTimeout(_acTimer);
+    removeAcList();
+    destCoord = null;
+    atualizarBotaoCalc();
+    const val = destInput.value.trim();
+    if (val.length < 3) return;
+    _acTimer = setTimeout(() => buscarSugestoes(val), 380);
+  });
+
+  destInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { removeAcList(); calcular(); }
+  });
+
+  destInput.addEventListener('blur', () => {
+    setTimeout(removeAcList, 300);
+    atualizarBotaoCalc();
+  });
+
+  async function buscarSugestoes(query) {
+    const local = buscarBaseLocal(query);
+    if (local.length) mostrarAcList(local);
+
+    try {
+      const ck = norm(query);
+      let google = [];
+      if (_cache[ck]) {
+        google = _cache[ck];
+      } else {
+        const url = `https://maps.googleapis.com/maps/api/geocode/json?address=${encodeURIComponent(query+', Juiz de Fora, MG, Brasil')}&region=br&language=pt-BR&key=${GOOGLE_API_KEY}`;
+        const r = await fetch(url);
+        const d = await r.json();
+        if (d.status === 'OK' && d.results.length) {
+          google = d.results.filter(res => {
+            return distanciaKm(res.geometry.location.lat, res.geometry.location.lng, JF_CENTRO.lat, JF_CENTRO.lon) <= 30;
+          }).slice(0,3).map(res => {
+            const comps  = res.address_components || [];
+            const rua    = comps.find(c => c.types.includes('route'));
+            const bairro = comps.find(c => c.types.includes('sublocality_level_1')||c.types.includes('neighborhood'));
+            const numero = comps.find(c => c.types.includes('street_number'));
+            const partes = [];
+            if (rua) partes.push(rua.long_name); else partes.push(res.formatted_address.split(',')[0]);
+            if (numero) partes.push(numero.long_name);
+            if (bairro) partes.push(bairro.long_name);
+            partes.push('Juiz de Fora, MG');
+            return { geometry: res.geometry, formatted_address: partes.filter(Boolean).join(', '), types: res.types, address_components: comps };
+          }).filter(res => {
+            const a = norm(res.formatted_address.split(',')[0]);
+            if (a === 'juiz de fora') return false;
+            return norm(query).split(/\s+/).some(p => p.length > 2 && a.includes(p));
+          });
+          _cache[ck] = google;
+        }
+      }
+
+      const localNomes = local.map(l => norm(l.formatted_address.split(',')[0]));
+      const merged = [...local, ...google.filter(g => {
+        const n = norm(g.formatted_address.split(',')[0]);
+        return !localNomes.some(ln => n.includes(ln) || ln.includes(n));
+      })].slice(0,5);
+      if (merged.length) mostrarAcList(merged);
+    } catch(e) {}
+  }
+
+  function mostrarAcList(results) {
+    removeAcList();
+    const list = document.createElement('div');
+    list.className = 'autocomplete-list';
+    results.forEach(res => {
+      const item = document.createElement('div');
+      item.className = 'autocomplete-item';
+      const parts = res.formatted_address.split(',');
+      const hasNum = /\d/.test(parts[0]);
+      const text = hasNum ? parts.slice(0,2).join(',').trim() : parts.slice(0,3).join(',').trim();
+
+      const tipos = res.types || [];
+      const ehEstab = tipos.some(t => ['establishment','point_of_interest','premise'].includes(t)) || res._local;
+      item.innerHTML = `<span class="autocomplete-icon">${ehEstab ? '🏢' : '📍'}</span><span>${text}</span>`;
+
+      item.addEventListener('mousedown', () => {
+        const tipos = res.types || [];
+        const ehBairro = !!(res._ehBairro);
+        let raioBairro = res._raioBairro || 'M';
+        if (!ehBairro) {
+          // Tenta detectar pelo nome
+          const detBairro = classificarBairro(norm(text.split(',')[0].trim()));
+          if (BAIRROS_P.has(norm(text.split(',')[0].trim())) || BAIRROS_G.has(norm(text.split(',')[0].trim()))) {
+            raioBairro = detBairro;
+          }
+        }
+        const ehLocal = !ehBairro && (tipos.some(t => ['establishment','point_of_interest','premise','airport','park','hospital','school','shopping_mall'].includes(t)) || res._local);
+
+        destCoord = {
+          lat: res.geometry.location.lat,
+          lon: res.geometry.location.lng,
+          formatted: res.formatted_address,
+          ehLocal,
+          ehBairro,
+          raioBairro,
+          temNumero: /\d/.test(text)
+        };
+        destInput.value = text;
+        removeAcList();
+        atualizarBotaoCalc();
+
+        // Se for rua sem número → pergunta número
+        if (!ehBairro && !ehLocal && !/\d/.test(text) && distanciaKm(destCoord.lat, destCoord.lon, JF_CENTRO.lat, JF_CENTRO.lon) < 20) {
+          setTimeout(() => perguntarNumero(), 150);
+        } else {
+          setTimeout(() => calcular(), 150);
+        }
+      });
+      list.appendChild(item);
+    });
+    destWrap.appendChild(list);
+  }
+
+  function removeAcList() {
+    const el = destWrap.querySelector('.autocomplete-list');
+    if (el) el.remove();
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // PERGUNTA NÚMERO
+  // ─────────────────────────────────────────────────────────────
+  function perguntarNumero() {
+    return new Promise(resolve => {
+      const ruaAtual = destInput.value.trim();
+      const overlay = criarOverlay(`
+        <div class="confirm-box">
+          <div class="confirm-title">Informe o número</div>
+          <div class="confirm-body">Para um cálculo mais preciso, informe o número do endereço.</div>
+          <input class="num-input" id="num-popup" type="number" inputmode="numeric" placeholder="Nº" />
+          <div class="confirm-btns">
+            <button class="btn-ok" id="btn-num-ok">Confirmar</button>
+            <button class="btn-cancel" id="btn-num-skip">Continuar sem número</button>
+          </div>
+        </div>`);
+
+      setTimeout(() => overlay.querySelector('#num-popup')?.focus(), 100);
+
+      overlay.querySelector('#btn-num-ok').onclick = () => {
+        const num = overlay.querySelector('#num-popup').value.trim();
+        overlay.remove();
+        if (num) {
+          const endComNum = ruaAtual.replace(/,\s*$/,'') + ', ' + num;
+          destInput.value = endComNum;
+          destCoord = null; // força geocode novo
+        }
+        resolve();
+        setTimeout(() => calcular(), 100);
+      };
+
+      overlay.querySelector('#num-popup').onkeydown = (e) => {
+        if (e.key === 'Enter') overlay.querySelector('#btn-num-ok').click();
+      };
+
+      overlay.querySelector('#btn-num-skip').onclick = () => {
+        overlay.remove();
+        resolve();
+        setTimeout(() => calcular(), 100);
+      };
+    });
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // GEOCODE DESTINO (quando não veio do autocomplete)
+  // ─────────────────────────────────────────────────────────────
+  async function geocodeDestino(addr) {
+    const q = encodeURIComponent(addr + ', Juiz de Fora, MG, Brasil');
+    const r = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?address=${q}&region=br&language=pt-BR&key=${GOOGLE_API_KEY}`);
+    const d = await r.json();
+    if (d.status !== 'OK' || !d.results.length) throw new Error('Endereço não encontrado.');
+    const res = d.results[0];
+    const loc = res.geometry.location;
+    const comps = res.address_components || [];
+    const cidade = comps.find(c => c.types.includes('administrative_area_level_2'));
+    const ehJF = cidade ? cidade.long_name.toLowerCase().includes('juiz de fora') : false;
+    const foraDeJF = cidade && !ehJF;
+    const tipos = res.types || [];
+    const ehLocal = tipos.some(t => ['establishment','point_of_interest'].includes(t));
+    return { lat: loc.lat, lon: loc.lng, formatted: res.formatted_address, ehLocal, ehBairro: false, raioBairro:'M', temNumero: /\d/.test(addr), foraDeJF };
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // ROTA OSRM
+  // ─────────────────────────────────────────────────────────────
+  async function calcularRota(origem, destino) {
+    const s = `${origem.lon},${origem.lat};${destino.lon},${destino.lat}`;
+    const urls = [
+      `https://router.project-osrm.org/route/v1/driving/${s}?overview=false`,
+      `https://routing.openstreetmap.de/routed-car/route/v1/driving/${s}?overview=false`
+    ];
+    for (const url of urls) {
+      try {
+        const r = await fetch(url);
+        const d = await r.json();
+        if (d.code === 'Ok' && d.routes.length) {
+          return { distKm: d.routes[0].distance/1000, durMin: d.routes[0].duration/60 };
+        }
+      } catch(e) { continue; }
+    }
+    throw new Error('Não foi possível calcular a rota.');
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // CÁLCULO PRINCIPAL
+  // ─────────────────────────────────────────────────────────────
+  async function calcular() {
+    if (!origemCoord) { showNotif('⚠️ Permita sua localização primeiro!'); return; }
+
+    const destText = destInput.value.trim();
+    if (!destText) { showNotif('⚠️ Informe o destino!'); return; }
+
+    if (destinoBloqueado(destText)) {
+      criarOverlay(`
+        <div class="confirm-box">
+          <div class="confirm-title">Fora do perímetro</div>
+          <div class="confirm-body">Para destinos em outros municípios, consulte diretamente com o taxista.</div>
+          <div class="confirm-btns"><button class="btn-ok" onclick="this.closest('.confirm-overlay').remove()">Entendi</button></div>
+        </div>`);
+      return;
+    }
+
+    const btn = document.getElementById('calc-btn');
+    btn.classList.add('loading');
+
+    try {
+      // Geocode se não veio do autocomplete
+      let dest = destCoord;
+      if (!dest) {
+        dest = await geocodeDestino(destText);
+        destCoord = dest;
+      }
+
+      // Valida distância do destino
+      const distJF = distanciaKm(dest.lat, dest.lon, JF_CENTRO.lat, JF_CENTRO.lon);
+      if (distJF > 30 || dest.foraDeJF) {
+        btn.classList.remove('loading');
+        criarOverlay(`
+          <div class="confirm-box">
+            <div class="confirm-title">Destino fora de JF</div>
+            <div class="confirm-body">O endereço parece estar fora do perímetro urbano de Juiz de Fora. Verifique e tente novamente.</div>
+            <div class="confirm-btns"><button class="btn-ok" onclick="this.closest('.confirm-overlay').remove()">OK</button></div>
+          </div>`);
+        return;
+      }
+
+      // Calcula rota
+      const { distKm, durMin } = await calcularRota(
+        { lat: origemCoord.lat, lon: origemCoord.lon },
+        { lat: dest.lat, lon: dest.lon }
+      );
+
+      // Trajeto muito longo
+      if (distKm >= 25) {
+        btn.classList.remove('loading');
+        criarOverlay(`
+          <div class="confirm-box">
+            <div class="confirm-title">Trajeto muito longo</div>
+            <div class="confirm-body">Este destino parece estar fora do perímetro urbano de JF. Para viagens intermunicipais, consulte o taxista diretamente.</div>
+            <div class="confirm-btns"><button class="btn-ok" onclick="this.closest('.confirm-overlay').remove()">Entendi</button></div>
+          </div>`);
+        return;
+      }
+
+      // Calcula faixa de preço
+      const kmRate  = bandeira === 2 ? TARIFAS.kmB2 : TARIFAS.kmB1;
+      const total   = TARIFAS.bandeirada + distKm * kmRate + (durMin*0.15/60) * TARIFAS.horaParada;
+      const hora    = new Date().getHours();
+      const horaCritica = hora >= 17 && hora < 20;
+
+      let fMin = horaCritica ? 1.00 : 0.95;
+      let fMax = horaCritica ? 1.20 : 1.10;
+
+      if (dest.ehBairro) {
+        const f = { 'P':[0.85,1.20], 'M':[0.85,1.40], 'G':[0.85,1.60] }[dest.raioBairro] || [0.85,1.40];
+        fMin = f[0]; fMax = f[1];
+      } else if (!dest.temNumero && !dest.ehLocal) {
+        fMin = 0.85; fMax = 1.50;
+      }
+
+      const vMin = Math.ceil(total * fMin);
+      const vMax = Math.ceil(total * fMax);
+
+      // Mostra resultado
+      mostrarResultado(vMin, vMax, distKm, dest, destText);
+
+    } catch(e) {
+      showNotif('❌ ' + (e.message || 'Erro ao calcular.'));
+    } finally {
+      btn.classList.remove('loading');
+    }
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // MOSTRAR RESULTADO
+  // ─────────────────────────────────────────────────────────────
+  function mostrarResultado(vMin, vMax, distKm, dest, destText) {
+    // Valor animado
+    const el = document.getElementById('result-value');
+    const dur = 600;
+    const start = Date.now();
+    const tick = () => {
+      const p = Math.min((Date.now()-start)/dur, 1);
+      const ease = 1 - Math.pow(1-p, 3);
+      el.textContent = `R$ ${Math.round(ease*vMin)} a R$ ${Math.round(ease*vMax)}`;
+      if (p < 1) requestAnimationFrame(tick);
+      else el.textContent = `R$ ${vMin} a R$ ${vMax}`;
+    };
+    requestAnimationFrame(tick);
+
+    // Bandeira
+    const badge = document.getElementById('bandeira-badge');
+    if (bandeira === 2) {
+      badge.textContent = '⚑ Bandeira 2 · Tarifa noturna/feriado';
+      badge.classList.add('bandeira2');
+    } else {
+      badge.textContent = '⚑ Bandeira 1';
+      badge.classList.remove('bandeira2');
+    }
+
+    // Mensagem
+    let msg = 'Valores estimados com base na tabela oficial do taxímetro. Boa corrida!';
+    if (dest.ehBairro) msg = 'Estimativa por bairro. Para mais precisão, informe rua e número.';
+    else if (!dest.temNumero && !dest.ehLocal) msg = 'Estimativa por rua. Para mais precisão, informe o número do endereço.';
+    document.getElementById('result-msg-text').textContent = msg;
+
+    // WhatsApp
+    const waText = encodeURIComponent(
+      `Olá! Preciso de um táxi.\n📍 Origem: ${origemCoord.endFormatado}\n🏁 Destino: ${destText}\n💰 Estimativa: R$ ${vMin} a R$ ${vMax}`
+    );
+    document.getElementById('whatsapp-btn').href = `https://wa.me/${WHATSAPP_NUM}?text=${waText}`;
+
+    document.getElementById('result-card').classList.add('visible');
+    document.getElementById('result-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    // Reset avaliação
+    document.getElementById('btn-like').classList.remove('ativo');
+    document.getElementById('btn-dislike').classList.remove('ativo');
+
+    if (navigator.vibrate) navigator.vibrate([80,40,80]);
+    showNotif('✅ Estimativa calculada!');
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // NOVO CÁLCULO
+  // ─────────────────────────────────────────────────────────────
+  function novoCalculo() {
+    destInput.value = '';
+    destCoord = null;
+    document.getElementById('result-card').classList.remove('visible');
+    document.getElementById('result-value').textContent = 'R$ —';
+    atualizarBotaoCalc();
+    destInput.focus();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // AVALIAÇÃO
+  // ─────────────────────────────────────────────────────────────
+  function avaliar(nota) {
+    document.getElementById('btn-like').classList.toggle('ativo', nota===1);
+    document.getElementById('btn-dislike').classList.toggle('ativo', nota===0);
+    showNotif(nota===1 ? '👍 Obrigado pelo feedback!' : '👎 Vamos melhorar!');
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // OVERLAY HELPER
+  // ─────────────────────────────────────────────────────────────
+  function criarOverlay(html) {
+    const el = document.createElement('div');
+    el.className = 'confirm-overlay';
+    el.innerHTML = html;
+    document.body.appendChild(el);
+    return el;
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // MODAL TERMOS
+  // ─────────────────────────────────────────────────────────────
+  let termoAceito = false;
+  function toggleCheck() {
+    termoAceito = !termoAceito;
+    document.getElementById('check-row').classList.toggle('checked', termoAceito);
+    document.getElementById('modal-checkbox').textContent = termoAceito ? '✓' : '';
+    document.getElementById('modal-btn').classList.toggle('enabled', termoAceito);
+  }
+  function entrarNoApp() {
+    if (!termoAceito) return;
+    const m = document.getElementById('modal-termos');
+    m.style.opacity = '0'; m.style.transition = 'opacity 0.4s';
+    setTimeout(() => m.style.display = 'none', 400);
+  }
+</script>
+
+
+</body></html>

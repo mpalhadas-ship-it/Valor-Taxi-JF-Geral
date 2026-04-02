@@ -5,32 +5,32 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Táxi Na Veia — Estimativa de corrida</title>
 <meta name="theme-color" content="#FFFBF0">
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800;900&family=DM+Sans:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
 :root {
-  --bg: #FFFBF0;
+  --bg: #FFE600;
   --surface: #FFFFFF;
-  --surface2: #F7F3E8;
-  --border: #E8E2D0;
-  --border2: #D4CCBA;
-  --yellow: #F5C400;
-  --yellow-dark: #C49A00;
-  --yellow-light: #FFF6CC;
-  --yellow-mid: rgba(245,196,0,0.25);
-  --green: #0A8A5C;
-  --green-light: #E6F7F1;
+  --surface2: #FFF9C2;
+  --border: #E0CC00;
+  --border2: #C8B800;
+  --yellow: #FFE600;
+  --yellow-dark: #3483FA;
+  --yellow-light: #EAF2FF;
+  --yellow-mid: rgba(52,131,250,0.2);
+  --green: #1565C0;
+  --green-light: #E3F2FD;
   --red: #D93025;
   --red-light: #FDECEA;
   --white: #FFFFFF;
-  --ink: #1A1400;
-  --ink2: #3D3520;
-  --muted: #857E6A;
-  --muted2: #B0A98E;
+  --ink: #1A1A2E;
+  --ink2: #2C2C4A;
+  --muted: #5A5A78;
+  --muted2: #8888A8;
   --radius: 16px;
-  --shadow: 0 2px 12px rgba(26,20,0,0.08);
-  --shadow-lg: 0 8px 32px rgba(26,20,0,0.12);
+  --shadow: 0 2px 12px rgba(0,0,80,0.10);
+  --shadow-lg: 0 8px 32px rgba(0,0,80,0.15);
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -38,7 +38,7 @@
 body {
   background: var(--bg);
   color: var(--ink);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Nunito', sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -89,7 +89,7 @@ header {
 }
 
 .logo-title {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 1.9rem;
   font-weight: 900;
   color: var(--ink);
@@ -98,9 +98,9 @@ header {
 }
 
 .logo-title span {
-  color: var(--yellow-dark);
-  background: var(--yellow-light);
-  padding: 0 4px;
+  color: #FFFFFF;
+  background: #3483FA;
+  padding: 0 6px;
   border-radius: 4px;
 }
 
@@ -140,7 +140,7 @@ header {
 }
 
 .headline h1 {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: clamp(1.55rem, 5.5vw, 2rem);
   font-weight: 800;
   line-height: 1.15;
@@ -229,8 +229,8 @@ header {
 .step-num {
   width: 22px; height: 22px;
   border-radius: 6px;
-  background: var(--yellow);
-  color: var(--ink);
+  background: #3483FA;
+  color: #FFFFFF;
   font-family: 'Space Mono', monospace;
   font-size: 0.65rem;
   font-weight: 700;
@@ -310,7 +310,7 @@ header {
 .gps-icon {
   width: 38px; height: 38px;
   border-radius: 10px;
-  background: var(--yellow);
+  background: #3483FA;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -319,10 +319,10 @@ header {
   transition: background 0.3s;
 }
 
-.gps-btn.success .gps-icon { background: var(--green); }
+.gps-btn.success .gps-icon { background: #1565C0; }
 
 .gps-title {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 0.88rem;
   font-weight: 700;
   color: var(--ink);
@@ -389,7 +389,7 @@ header {
   border-radius: 11px;
   padding: 13px 15px;
   color: var(--ink);
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 0.95rem;
   outline: none;
   transition: all 0.2s;
@@ -436,12 +436,12 @@ header {
 /* ── CALC BUTTON ── */
 .calc-btn {
   width: 100%;
-  background: var(--yellow);
-  color: var(--ink);
+  background: #3483FA;
+  color: #FFFFFF;
   border: none;
   border-radius: 13px;
   padding: 15px;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-weight: 800;
   font-size: 0.95rem;
   cursor: pointer;
@@ -452,15 +452,15 @@ header {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: 0 4px 14px rgba(245,196,0,0.4);
+  box-shadow: 0 4px 14px rgba(52,131,250,0.4);
   position: relative;
   overflow: hidden;
   margin-top: 4px;
 }
 
-.calc-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,196,0,0.5); background: #F0BC00; }
+.calc-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(52,131,250,0.5); background: #1A6FDB; }
 .calc-btn:active { transform: translateY(0); }
-.calc-btn:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; transform: none; box-shadow: none; }
+.calc-btn:disabled { background: #C5D8FF; color: #7AABFF; cursor: not-allowed; transform: none; box-shadow: none; }
 
 .spinner {
   display: none;
@@ -492,7 +492,7 @@ header {
 
 .result-top {
   padding: 28px 24px 22px;
-  background: linear-gradient(135deg, #FFFBEA 0%, #FFF8D8 100%);
+  background: linear-gradient(135deg, #FFFDE0 0%, #FFE600 100%);
   border-bottom: 1px solid var(--border);
   text-align: center;
   position: relative;
@@ -508,14 +508,14 @@ header {
 .result-label-top {
   font-family: 'Space Mono', monospace;
   font-size: 0.58rem;
-  color: var(--yellow-dark);
+  color: #3483FA;
   letter-spacing: 3px;
   text-transform: uppercase;
   margin-bottom: 8px;
 }
 
 .result-value {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: clamp(2rem, 7vw, 3rem);
   font-weight: 900;
   color: var(--ink);
@@ -588,7 +588,7 @@ header {
   border: none;
   border-radius: 11px;
   padding: 14px;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-weight: 800;
   font-size: 0.9rem;
   cursor: pointer;
@@ -610,7 +610,7 @@ header {
   border: 1px solid var(--border);
   border-radius: 11px;
   padding: 11px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 0.83rem;
   cursor: pointer;
   transition: all 0.2s;
@@ -672,7 +672,7 @@ header {
 }
 
 .hist-value {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-weight: 800;
   font-size: 1.1rem;
   color: var(--ink);
@@ -783,7 +783,7 @@ header {
 }
 
 .confirm-title {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 1rem;
   font-weight: 800;
   color: var(--ink);
@@ -797,12 +797,12 @@ header {
 .confirm-btns { display: flex; flex-direction: column; gap: 7px; }
 
 .btn-ok {
-  background: var(--yellow);
-  color: var(--ink);
+  background: #3483FA;
+  color: #FFFFFF;
   border: none;
   border-radius: 10px;
   padding: 12px;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-weight: 800;
   font-size: 0.88rem;
   cursor: pointer;
@@ -811,7 +811,7 @@ header {
   transition: all 0.2s;
 }
 
-.btn-ok:hover { background: #F0BC00; }
+.btn-ok:hover { background: #1A6FDB; }
 
 .btn-cancel {
   background: transparent;
@@ -819,7 +819,7 @@ header {
   border: 1px solid var(--border);
   border-radius: 10px;
   padding: 10px;
-  font-family: 'DM Sans', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 0.83rem;
   cursor: pointer;
   transition: all 0.2s;
@@ -840,7 +840,7 @@ header {
 .modal-emoji { font-size: 3rem; margin-bottom: 14px; display: block; }
 
 .modal-title {
-  font-family: 'Syne', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 1.5rem;
   font-weight: 900;
   color: var(--ink);
@@ -895,12 +895,12 @@ header {
 
 .modal-btn {
   width: 100%;
-  background: var(--yellow);
-  color: var(--ink);
+  background: #3483FA;
+  color: #FFFFFF;
   border: none;
   border-radius: 12px;
   padding: 15px;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-weight: 900;
   font-size: 1rem;
   letter-spacing: 1px;
@@ -912,15 +912,15 @@ header {
 }
 
 .modal-btn.enabled { opacity: 1; pointer-events: all; }
-.modal-btn.enabled:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(245,196,0,0.4); }
+.modal-btn.enabled:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(52,131,250,0.4); }
 
 /* ── NOTIF ── */
 .notif {
   position: fixed;
   bottom: 24px; left: 50%;
   transform: translateX(-50%) translateY(20px);
-  background: var(--ink);
-  color: #FFF8D8;
+  background: #3483FA;
+  color: #FFFFFF;
   padding: 10px 22px;
   border-radius: 40px;
   font-size: 0.82rem;
@@ -950,7 +950,7 @@ footer {
   border: 1.5px solid var(--yellow);
   border-radius: 10px;
   padding: 13px;
-  font-family: 'Syne', sans-serif;
+  font-family: 'Nunito', sans-serif;
   font-size: 1.5rem;
   font-weight: 700;
   color: var(--ink);
@@ -974,7 +974,7 @@ footer {
 <div class="modal-overlay" id="modal-termos">
   <div class="modal-box">
     <span class="modal-emoji">🚕</span>
-    <div class="modal-title">Táxi JF</div>
+    <div class="modal-title">Táxi Na Veia</div>
     <div class="modal-sub">Estimativa de valor para corridas em Juiz de Fora</div>
     <div class="modal-text-box">
       <p>Os valores exibidos são <strong>estimativas</strong> com base na tabela oficial do taxímetro.<br><br>
@@ -992,7 +992,7 @@ footer {
   <header>
     <div class="logo-block">
       <span class="logo-tag">★ Juiz de Fora · MG</span>
-      <div class="logo-title">Táxi<span>JF</span></div>
+      <div class="logo-title">Táxi <span>Na Veia</span></div>
     </div>
     <div class="live-badge">
       <div class="live-dot"></div>
@@ -1098,9 +1098,9 @@ footer {
           <span id="result-msg-text"></span>
         </div>
 
-        <a class="whatsapp-btn" id="whatsapp-btn" href="#" target="_blank">
+        <a class="whatsapp-btn" id="whatsapp-btn" href="https://chat.whatsapp.com/JXSj8S52e4UKi2IrxLEehV" target="_blank">
           <span>📲</span>
-          <span>Chamar táxi pelo WhatsApp</span>
+          <span>Entre no Grupo e solicite seu Táxi</span>
         </a>
 
         <div class="avaliacao-row">
@@ -1119,7 +1119,7 @@ footer {
     <div id="hist-list"></div>
   </div>
 
-  <footer>taxijf · baseado na tabela oficial do taxímetro de JF</footer>
+  <footer>taxinaveia · baseado na tabela oficial do taxímetro de JF</footer>
 </div>
 
 <div class="notif" id="notif"></div>
@@ -1837,7 +1837,7 @@ function avaliar(nota) {
 // HISTÓRICO
 // ─────────────────────────────────────────────────────────────
 function salvarHistorico(vMin, vMax, origem, destino, band) {
-  const hist = JSON.parse(localStorage.getItem('taxijf_hist') || '[]');
+  const hist = JSON.parse(localStorage.getItem('taxinaveia_hist') || '[]');
   hist.unshift({
     id: Date.now(),
     vMin, vMax,
@@ -1846,16 +1846,16 @@ function salvarHistorico(vMin, vMax, origem, destino, band) {
     ts: new Date().toISOString()
   });
   if (hist.length > 20) hist.pop();
-  localStorage.setItem('taxijf_hist', JSON.stringify(hist));
+  localStorage.setItem('taxinaveia_hist', JSON.stringify(hist));
 }
 
 function carregarHistorico() {
-  return JSON.parse(localStorage.getItem('taxijf_hist') || '[]');
+  return JSON.parse(localStorage.getItem('taxinaveia_hist') || '[]');
 }
 
 function deletarHistorico(id) {
   const hist = carregarHistorico().filter(h => h.id !== id);
-  localStorage.setItem('taxijf_hist', JSON.stringify(hist));
+  localStorage.setItem('taxinaveia_hist', JSON.stringify(hist));
   renderHistorico();
 }
 
@@ -1871,7 +1871,7 @@ function limparHistorico() {
     </div>`);
   setTimeout(() => {
     document.getElementById('btn-conf-clear').onclick = () => {
-      localStorage.removeItem('taxijf_hist');
+      localStorage.removeItem('taxinaveia_hist');
       document.querySelector('.confirm-overlay')?.remove();
       renderHistorico();
       showNotif('🗑️ Histórico limpo!');
